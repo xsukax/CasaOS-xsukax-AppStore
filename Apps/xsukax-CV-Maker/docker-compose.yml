@@ -1,0 +1,58 @@
+name: xsukax-cv-maker
+
+services:
+  app:
+    image: nginx:alpine
+    container_name: cv-maker
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8888
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/cv-maker
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-CV-Maker.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: CV Maker files location on host
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, privacy-focused web application for creating professional CVs and resumes entirely in your browser. No server-side processing, no data collection, and complete control over your personal information.
+  tagline:
+    en_us: Privacy-focused CV/Resume maker - runs entirely in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+  thumbnail: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+  title:
+    en_us: CV Maker
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-CV-Maker
+  port_map: "8888"
