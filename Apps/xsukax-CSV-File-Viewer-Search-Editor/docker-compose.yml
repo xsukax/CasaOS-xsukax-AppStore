@@ -1,0 +1,56 @@
+name: xsukax-csv-viewer
+services:
+  app:
+    image: nginx:alpine
+    container_name: csv-viewer
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8892
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/csv-viewer
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-CSV-File-Viewer-Search-Editor.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: CSV File Viewer application files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, privacy-focused web-based CSV file viewer and editor that operates entirely in your browser with zero server-side processing or data transmission. View, search, and edit CSV files with complete data privacy.
+  tagline:
+    en_us: Privacy-focused CSV viewer and editor - runs entirely in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/128/6741/6741152.png
+  thumbnail: https://cdn-icons-png.flaticon.com/128/6741/6741152.png
+  title:
+    en_us: CSV File Viewer & Editor
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-CSV-File-Viewer-Search-Editor
+  port_map: "8892"
