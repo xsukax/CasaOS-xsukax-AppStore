@@ -1,0 +1,58 @@
+name: xsukax-vcf-contacts-manager
+
+services:
+  app:
+    image: nginx:alpine
+    container_name: vcf-contacts-manager
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8889
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/vcf-contacts-manager
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-VCF-Contacts-Manager.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: VCF Contacts Manager files location on host
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, modern web-based contact management application that allows you to import, edit, and export VCF (vCard) contact files directly in your browser. Privacy-focused with no server-side processing or data collection.
+  tagline:
+    en_us: Modern VCF/vCard contact manager - runs entirely in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/512/3281/3281307.png
+  thumbnail: https://cdn-icons-png.flaticon.com/512/3281/3281307.png
+  title:
+    en_us: VCF Contacts Manager
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-VCF-Contacts-Manager
+  port_map: "8889"
