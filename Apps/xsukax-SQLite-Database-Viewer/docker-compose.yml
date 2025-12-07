@@ -1,0 +1,56 @@
+name: xsukax-sqlite-viewer
+services:
+  app:
+    image: nginx:alpine
+    container_name: sqlite-viewer
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8896
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/sqlite-viewer
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-SQLite-Database-Viewer.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: SQLite Database Viewer files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, privacy-focused web application for viewing and managing SQLite databases entirely in your browser. No server-side processing, no data collection, and complete control over your database files.
+  tagline:
+    en_us: Privacy-focused SQLite Database Viewer - runs entirely in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/512/2906/2906274.png
+  thumbnail: https://cdn-icons-png.flaticon.com/512/2906/2906274.png
+  title:
+    en_us: SQLite Database Viewer
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-SQLite-Database-Viewer
+  port_map: "8896"
