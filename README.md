@@ -13,6 +13,8 @@ https://github.com/xsukax/CasaOS-xsukax-AppStore/archive/refs/heads/main.zip
 ├── xsukax-CSV-File-Viewer-Search-Editor
 ├── xsukax-CV-Maker
 ├── xsukax-File-Base64-Converter
+├── xsukax-Markdown-Viewer
 ├── xsukax-VCF-Contacts-Manager
-└── xsukax-WinGet-Generator
+├── xsukax-WinGet-Generator
+└── xsukax-Youtube-to-Embed-URL
 ```
