@@ -14,6 +14,8 @@ https://github.com/xsukax/CasaOS-xsukax-AppStore/archive/refs/heads/main.zip
 ├── xsukax-CV-Maker
 ├── xsukax-File-Base64-Converter
 ├── xsukax-GPG-PGP-File-Encryptor-Decryptor
+├── xsukax-GPG-PGP-Key-Generator
+├── xsukax-IPFS-Tools
 ├── xsukax-Markdown-Viewer
 ├── xsukax-SQLite-Database-Viewer
 ├── xsukax-VCF-Contacts-Manager
