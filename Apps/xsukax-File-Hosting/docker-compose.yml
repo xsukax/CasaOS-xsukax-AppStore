@@ -1,0 +1,68 @@
+name: xsukax-file-hosting
+services:
+  app:
+    image: trafex/php-nginx:latest
+    container_name: file-hosting
+    restart: unless-stopped
+    user: root
+    ports:
+      - target: 8080
+        published: 8900
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/file-hosting
+        target: /var/www/html
+    environment:
+      - SUPERVISOR_USER=root
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache php84-pdo php84-pdo_sqlite php84-sqlite3
+        if [ ! -f /var/www/html/index.php ]; then
+          wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/index.php -O /var/www/html/index.php
+          wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/admin.php -O /var/www/html/admin.php
+          wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/download.php -O /var/www/html/download.php
+        fi
+        mkdir -p /var/www/html/downloads
+        chown -R nginx:nginx /var/www/html
+        chmod -R 755 /var/www/html
+        chmod 775 /var/www/html
+        chmod 775 /var/www/html/downloads
+        sed -i '/http {/a \    client_max_body_size 100M;' /etc/nginx/nginx.conf
+        echo "upload_max_filesize = 100M" > /etc/php84/conf.d/uploads.ini
+        echo "post_max_size = 100M" >> /etc/php84/conf.d/uploads.ini
+        echo "memory_limit = 256M" >> /etc/php84/conf.d/uploads.ini
+        echo "max_execution_time = 300" >> /etc/php84/conf.d/uploads.ini
+        echo "max_input_time = 300" >> /etc/php84/conf.d/uploads.ini
+        sed -i '/^\[www\]/a user = nginx\ngroup = nginx\nlisten.owner = nginx\nlisten.group = nginx\nlisten.mode = 0660' /etc/php84/php-fpm.d/www.conf
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+    x-casaos:
+      volumes:
+        - container: /var/www/html
+          description:
+            en_us: Application files and uploads directory
+      ports:
+        - container: "8080"
+          description:
+            en_us: WebUI HTTP Port
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: Lightweight, secure, self-hosted file sharing solution with PHP and SQLite. Features drag-and-drop uploads, customizable download pages, advertisement integration, comprehensive admin panel, and detailed file analytics. Default admin password is 'admin123' (change immediately after first login).
+  tagline:
+    en_us: Self-hosted file sharing with admin control
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/128/860/860202.png
+  thumbnail: https://cdn-icons-png.flaticon.com/128/860/860202.png
+  title:
+    en_us: xsukax File Hosting
+  category: Productivity
+  project_url: https://github.com/xsukax/xsukax-File-Hosting
+  port_map: "8900"
