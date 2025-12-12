@@ -1,0 +1,86 @@
+name: xsukax-flat-file-cms
+services:
+  app:
+    image: trafex/php-nginx:latest
+    container_name: flat-file-cms
+    restart: unless-stopped
+    user: root
+    ports:
+      - target: 8080
+        published: 8901
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/flat-file-cms
+        target: /var/www/html
+    environment:
+      - SUPERVISOR_USER=root
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache php84-session php84-fileinfo git
+        if [ ! -f /var/www/html/index.php ]; then
+          git clone --depth 1 https://github.com/xsukax/xsukax-Flat-File-CMS.git /tmp/cms
+          cp -r /tmp/cms/* /var/www/html/
+          rm -rf /tmp/cms
+        fi
+        mkdir -p /var/www/html/Posts
+        mkdir -p /var/www/html/themes
+        if [ ! -f /var/www/html/themes/github.php ]; then
+          echo "Theme file missing, please add themes manually" > /var/www/html/themes/README.txt
+        fi
+        chown -R nginx:nginx /var/www/html
+        chmod -R 755 /var/www/html
+        chmod 775 /var/www/html
+        chmod 775 /var/www/html/Posts
+        chmod 775 /var/www/html/themes
+        touch /var/www/config.php
+        chown nginx:nginx /var/www/config.php
+        chmod 664 /var/www/config.php
+        echo "memory_limit = 128M" > /etc/php84/conf.d/cms.ini
+        echo "max_execution_time = 60" >> /etc/php84/conf.d/cms.ini
+        echo "max_input_time = 60" >> /etc/php84/conf.d/cms.ini
+        echo "[www]" > /etc/php84/php-fpm.d/www.conf
+        echo "user = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "group = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen = /run/php-fpm.sock" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.owner = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.group = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.mode = 0660" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm = dynamic" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.max_children = 5" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.start_servers = 2" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.min_spare_servers = 1" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.max_spare_servers = 3" >> /etc/php84/php-fpm.d/www.conf
+        echo c2VydmVyIHsKICAgIGxpc3RlbiA4MDgwIGRlZmF1bHRfc2VydmVyOwogICAgc2VydmVyX25hbWUgXzsKICAgIHJvb3QgL3Zhci93d3cvaHRtbDsKICAgIGluZGV4IGluZGV4LnBocCBpbmRleC5odG1sOwoKICAgIGxvY2F0aW9uIC8gewogICAgICAgIHRyeV9maWxlcyAkdXJpICR1cmkvIC9pbmRleC5waHA/JHF1ZXJ5X3N0cmluZzsKICAgIH0KCiAgICBsb2NhdGlvbiB+IFwucGhwJCB7CiAgICAgICAgZmFzdGNnaV9wYXNzIHVuaXg6L3J1bi9waHAtZnBtLnNvY2s7CiAgICAgICAgZmFzdGNnaV9wYXJhbSBTQ1JJUFRfRklMRU5BTUUgJGRvY3VtZW50X3Jvb3QkZmFzdGNnaV9zY3JpcHRfbmFtZTsKICAgICAgICBpbmNsdWRlIGZhc3RjZ2lfcGFyYW1zOwogICAgfQoKICAgIGxvY2F0aW9uIH4qIFwuKHNpdGVtYXB8cnNzfGZlZWQpXC54bWwkIHsKICAgICAgICB0cnlfZmlsZXMgJHVyaSAvaW5kZXgucGhwPyRxdWVyeV9zdHJpbmc7CiAgICB9CgogICAgbG9jYXRpb24gfiAvXC4gewogICAgICAgIGRlbnkgYWxsOwogICAgfQoKICAgIGxvY2F0aW9uIH4gL1Bvc3RzLyB7CiAgICAgICAgZGVueSBhbGw7CiAgICB9Cn0K | base64 -d > /etc/nginx/conf.d/default.conf
+        nginx -t
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+    x-casaos:
+      volumes:
+        - container: /var/www/html
+          description:
+            en_us: Application files and posts directory
+      ports:
+        - container: "8080"
+          description:
+            en_us: WebUI HTTP Port
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A modern, elegant flat-file CMS for professional blogs. No database required - posts are stored as simple files. Features include a WYSIWYG editor (Quill.js), tag management, theme support, RSS/sitemap generation, and a GitHub-inspired admin interface. Default admin password is 'admin123' (change immediately after first login via Settings).
+  tagline:
+    en_us: Modern flat-file CMS for blogs
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/128/17349/17349275.png
+  thumbnail: https://cdn-icons-png.flaticon.com/128/17349/17349275.png
+  title:
+    en_us: xsukax Flat-File CMS
+  category: Blog
+  project_url: https://github.com/xsukax/xsukax-Flat-File-CMS
+  port_map: "8901"
