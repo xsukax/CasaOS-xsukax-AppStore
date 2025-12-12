@@ -19,6 +19,8 @@ https://github.com/xsukax/CasaOS-xsukax-AppStore/archive/refs/heads/main.zip
 ├── xsukax-GPG-PGP-Key-Generator
 ├── xsukax-IPFS-Tools
 ├── xsukax-Markdown-Viewer
+├── xsukax-Overlay-Studio
+├── xsukax-ReadClean-PDF
 ├── xsukax-SQLite-Database-Viewer
 ├── xsukax-VCF-Contacts-Manager
 ├── xsukax-WinGet-Generator
