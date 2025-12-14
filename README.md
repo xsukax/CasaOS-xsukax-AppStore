@@ -12,11 +12,13 @@ https://github.com/xsukax/CasaOS-xsukax-AppStore/archive/refs/heads/main.zip
 ├── xsukax-AES-256-File-Encryptor-Decryptor
 ├── xsukax-CSV-File-Viewer-Search-Editor
 ├── xsukax-CV-Maker
+├── xsukax-Favicon-Generator
 ├── xsukax-File-Base64-Converter
 ├── xsukax-File-Hosting
 ├── xsukax-Flat-File-CMS
 ├── xsukax-GPG-PGP-File-Encryptor-Decryptor
 ├── xsukax-GPG-PGP-Key-Generator
+├── xsukax-ICO-File-Analyzer
 ├── xsukax-IPFS-Tools
 ├── xsukax-Markdown-Viewer
 ├── xsukax-Overlay-Studio
