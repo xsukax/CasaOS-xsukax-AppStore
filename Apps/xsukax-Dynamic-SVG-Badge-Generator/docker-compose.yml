@@ -1,0 +1,90 @@
+name: xsukax-svg-badge-generator
+services:
+  app:
+    image: trafex/php-nginx:latest
+    container_name: svg-badge-generator
+    restart: unless-stopped
+    user: root
+    ports:
+      - target: 8080
+        published: 8907
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/svg-badge-generator
+        target: /var/www/html
+    environment:
+      - SUPERVISOR_USER=root
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        # Install git if needed for initial clone
+        apk add --no-cache git
+        
+        # Clone repository if index.php doesn't exist
+        if [ ! -f /var/www/html/index.php ]; then
+          git clone --depth 1 https://github.com/xsukax/xsukax-Dynamic-SVG-Badge-Generator.git /tmp/badge
+          cp /tmp/badge/index.php /var/www/html/
+          rm -rf /tmp/badge
+        fi
+        
+        # Set proper ownership and permissions
+        chown -R nginx:nginx /var/www/html
+        chmod -R 755 /var/www/html
+        
+        # Configure PHP settings for optimal badge generation
+        echo "memory_limit = 64M" > /etc/php84/conf.d/badge.ini
+        echo "max_execution_time = 30" >> /etc/php84/conf.d/badge.ini
+        echo "expose_php = Off" >> /etc/php84/conf.d/badge.ini
+        
+        # Configure PHP-FPM
+        echo "[www]" > /etc/php84/php-fpm.d/www.conf
+        echo "user = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "group = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen = /run/php-fpm.sock" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.owner = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.group = nginx" >> /etc/php84/php-fpm.d/www.conf
+        echo "listen.mode = 0660" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm = dynamic" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.max_children = 5" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.start_servers = 2" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.min_spare_servers = 1" >> /etc/php84/php-fpm.d/www.conf
+        echo "pm.max_spare_servers = 3" >> /etc/php84/php-fpm.d/www.conf
+        
+        # Configure Nginx for badge generator
+        echo c2VydmVyIHsKICAgIGxpc3RlbiA4MDgwIGRlZmF1bHRfc2VydmVyOwogICAgc2VydmVyX25hbWUgXzsKICAgIHJvb3QgL3Zhci93d3cvaHRtbDsKICAgIGluZGV4IGluZGV4LnBocDsKCiAgICAjIEVuYWJsZSBjYWNoaW5nIGZvciBTVkcgYmFkZ2VzCiAgICBhZGRfaGVhZGVyIENhY2hlLUNvbnRyb2wgIm1heC1hZ2U9MzAwIjsKICAgIAogICAgbG9jYXRpb24gLyB7CiAgICAgICAgdHJ5X2ZpbGVzICR1cmkgJHVyaS8gL2luZGV4LnBocD8kcXVlcnlfc3RyaW5nOwogICAgfQoKICAgIGxvY2F0aW9uIH4gXC5waHAkIHsKICAgICAgICBmYXN0Y2dpX3Bhc3MgdW5peDovL3J1bi9waHAtZnBtLnNvY2s7CiAgICAgICAgZmFzdGNnaV9wYXJhbSBTQ1JJUFRfRklMRU5BTUUgJGRvY3VtZW50X3Jvb3QkZmFzdGNnaV9zY3JpcHRfbmFtZTsKICAgICAgICBpbmNsdWRlIGZhc3RjZ2lfcGFyYW1zOwogICAgfQoKICAgICMgRGVueSBhY2Nlc3MgdG8gaGlkZGVuIGZpbGVzCiAgICBsb2NhdGlvbiB+IC9cLiB7CiAgICAgICAgZGVueSBhbGw7CiAgICB9Cn0K | base64 -d > /etc/nginx/conf.d/default.conf
+        
+        # Test nginx configuration
+        nginx -t
+        
+        # Start supervisord
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+    x-casaos:
+      volumes:
+        - container: /var/www/html
+          description:
+            en_us: Badge generator application files
+      ports:
+        - container: "8080"
+          description:
+            en_us: WebUI HTTP Port
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A robust, dynamic SVG badge generator for creating custom badges with labels, messages, and colors. Supports named colors, hex colors, custom fonts, and automatic text sizing. Perfect for GitHub README files, documentation, and status indicators. Use query parameters like ?badge=label-message-color1-color2.svg to generate badges on the fly. Features caching, URL encoding support, and professional SVG output.
+  tagline:
+    en_us: Dynamic SVG Badge Generator
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/15588/15588387.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/15588/15588387.png
+  title:
+    en_us: xsukax SVG Badge Generator
+  category: Developer Tools
+  project_url: https://github.com/xsukax/xsukax-Dynamic-SVG-Badge-Generator
+  port_map: "8907"
