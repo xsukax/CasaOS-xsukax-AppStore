@@ -1,0 +1,56 @@
+name: xsukax-github-social-image-generator
+services:
+  app:
+    image: nginx:alpine
+    container_name: github-social-image-generator
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8909
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/github-social-image-generator
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-Github-Social-Image-Generator.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: GitHub Social Image Generator files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, privacy-focused web application that generates stunning cover images for your GitHub repositories. Create professional social media preview images with zero setup, no server requirements, and complete data privacy. Features six unique design templates and 100+ color combinations.
+  tagline:
+    en_us: Generate professional GitHub repository cover images in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/10092/10092599.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/10092/10092599.png
+  title:
+    en_us: GitHub Social Image Generator
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-Github-Social-Image-Generator
+  port_map: "8909"
