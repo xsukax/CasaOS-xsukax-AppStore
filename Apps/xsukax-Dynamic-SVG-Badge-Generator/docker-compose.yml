@@ -1,7 +1,7 @@
 name: xsukax-svg-badge-generator
 services:
   app:
-    image: trafex/php-nginx:latest
+    image: trafex/php-nginx:3.10
     container_name: svg-badge-generator
     restart: unless-stopped
     user: root
@@ -13,8 +13,6 @@ services:
       - type: bind
         source: /DATA/AppData/svg-badge-generator
         target: /var/www/html
-    environment:
-      - SUPERVISOR_USER=root
     entrypoint: /bin/sh
     command:
       - -c
@@ -57,6 +55,9 @@ services:
         
         # Test nginx configuration
         nginx -t
+        
+        # Configure supervisord to run as nginx user
+        sed -i 's/^user=.*/user=nginx/' /etc/supervisor/conf.d/supervisord.conf
         
         # Start supervisord
         exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
