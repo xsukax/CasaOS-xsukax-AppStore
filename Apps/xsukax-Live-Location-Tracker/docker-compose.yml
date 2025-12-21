@@ -1,7 +1,7 @@
 name: xsukax-live-location-tracker
 services:
   app:
-    image: trafex/php-nginx:latest
+    image: trafex/php-nginx:3.10
     container_name: live-location-tracker
     restart: unless-stopped
     user: root
