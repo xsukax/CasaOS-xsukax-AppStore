@@ -1,7 +1,7 @@
 name: xsukax-file-hosting
 services:
   app:
-    image: trafex/php-nginx:latest
+    image: trafex/php-nginx:3.10
     container_name: file-hosting
     restart: unless-stopped
     user: root  # KEEP THIS - needed for setup
