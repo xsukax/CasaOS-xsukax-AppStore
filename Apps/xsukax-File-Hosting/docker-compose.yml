@@ -4,7 +4,7 @@ services:
     image: trafex/php-nginx:latest
     container_name: file-hosting
     restart: unless-stopped
-    user: root
+    user: root  # KEEP THIS - needed for setup
     ports:
       - target: 8080
         published: 8900
@@ -13,23 +13,28 @@ services:
       - type: bind
         source: /DATA/AppData/file-hosting
         target: /var/www/html
-    environment:
-      - SUPERVISOR_USER=root
     entrypoint: /bin/sh
     command:
       - -c
       - |
+        # Install required packages
         apk add --no-cache php84-pdo php84-pdo_sqlite php84-sqlite3
+        
+        # Download application files if not present
         if [ ! -f /var/www/html/index.php ]; then
           wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/index.php -O /var/www/html/index.php
           wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/admin.php -O /var/www/html/admin.php
           wget -q https://raw.githubusercontent.com/xsukax/xsukax-File-Hosting/main/download.php -O /var/www/html/download.php
         fi
+        
+        # Create directories and set permissions
         mkdir -p /var/www/html/downloads
         chown -R nginx:nginx /var/www/html
         chmod -R 755 /var/www/html
         chmod 775 /var/www/html
         chmod 775 /var/www/html/downloads
+        
+        # Configure nginx and PHP
         sed -i '/http {/a \    client_max_body_size 100M;' /etc/nginx/nginx.conf
         echo "upload_max_filesize = 100M" > /etc/php84/conf.d/uploads.ini
         echo "post_max_size = 100M" >> /etc/php84/conf.d/uploads.ini
@@ -37,6 +42,11 @@ services:
         echo "max_execution_time = 300" >> /etc/php84/conf.d/uploads.ini
         echo "max_input_time = 300" >> /etc/php84/conf.d/uploads.ini
         sed -i '/^\[www\]/a user = nginx\ngroup = nginx\nlisten.owner = nginx\nlisten.group = nginx\nlisten.mode = 0660' /etc/php84/php-fpm.d/www.conf
+        
+        # Configure supervisord to run as nginx user (NOT root)
+        sed -i 's/^user=.*/user=nginx/' /etc/supervisor/conf.d/supervisord.conf
+        
+        # Start supervisord (it will spawn nginx and php-fpm as nginx user)
         exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
     x-casaos:
       volumes:
