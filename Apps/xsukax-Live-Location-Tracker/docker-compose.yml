@@ -13,8 +13,6 @@ services:
       - type: bind
         source: /DATA/AppData/live-location-tracker
         target: /var/www/html
-    environment:
-      - SUPERVISOR_USER=root
     entrypoint: /bin/sh
     command:
       - -c
@@ -46,6 +44,7 @@ services:
         echo "pm.max_spare_servers = 3" >> /etc/php84/php-fpm.d/www.conf
         echo c2VydmVyIHsKICAgIGxpc3RlbiA4MDgwIGRlZmF1bHRfc2VydmVyOwogICAgc2VydmVyX25hbWUgXzsKICAgIHJvb3QgL3Zhci93d3cvaHRtbDsKICAgIGluZGV4IGluZGV4LnBocDsKCiAgICBsb2NhdGlvbiAvIHsKICAgICAgICB0cnlfZmlsZXMgJHVyaSAkdXJpLyAvaW5kZXgucGhwPyRxdWVyeV9zdHJpbmc7CiAgICB9CgogICAgbG9jYXRpb24gfiBcLnBocCQgewogICAgICAgIGZhc3RjZ2lfcGFzcyB1bml4Oi9ydW4vcGhwLWZwbS5zb2NrOwogICAgICAgIGZhc3RjZ2lfcGFyYW0gU0NSSVBUX0ZJTEVOQU1FICRkb2N1bWVudF9yb290JGZhc3RjZ2lfc2NyaXB0X25hbWU7CiAgICAgICAgaW5jbHVkZSBmYXN0Y2dpX3BhcmFtczsKICAgIH0KCiAgICBsb2NhdGlvbiB+IC9cLiB7CiAgICAgICAgZGVueSBhbGw7CiAgICB9CgogICAgbG9jYXRpb24gfiBcLmpzb24kIHsKICAgICAgICBkZW55IGFsbDsKICAgIH0KfQo= | base64 -d > /etc/nginx/conf.d/default.conf
         nginx -t
+        sed -i 's/^user=.*/user=nginx/' /etc/supervisor/conf.d/supervisord.conf
         exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
     x-casaos:
       volumes:
