@@ -1,7 +1,7 @@
 name: xsukax-flat-file-cms
 services:
   app:
-    image: trafex/php-nginx:latest
+    image: trafex/php-nginx:3.10
     container_name: flat-file-cms
     restart: unless-stopped
     user: root
