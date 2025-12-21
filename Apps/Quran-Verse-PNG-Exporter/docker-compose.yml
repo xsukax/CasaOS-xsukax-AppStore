@@ -1,0 +1,56 @@
+name: xsukax-quran-verse-exporter
+services:
+  app:
+    image: nginx:alpine
+    container_name: quran-verse-exporter
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8912
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/quran-verse-exporter
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/Quran-Verse-PNG-Exporter.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: Quran Verse PNG Exporter files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A web-based tool to generate beautifully styled PNG images of Quranic verses. Fetches authentic Uthmani script text from the AlQuran.cloud API, with options to customize appearance and export transparent or colored images directly from your browser. Privacy-focused with no data collection.
+  tagline:
+    en_us: Generate beautiful Quran verse PNG - browser-based Islamic tool
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/4358/4358606.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/4358/4358606.png
+  title:
+    en_us: Quran Verse PNG Exporter
+  category: Utilities
+  project_url: https://github.com/xsukax/Quran-Verse-PNG-Exporter
+  port_map: "8912"
