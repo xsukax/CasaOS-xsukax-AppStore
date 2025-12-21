@@ -1,0 +1,56 @@
+name: xsukax-kml-kmz-map-viewer
+services:
+  app:
+    image: nginx:alpine
+    container_name: kml-kmz-map-viewer
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8915
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/kml-kmz-map-viewer
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-KML-KMZ-Map-Viewer.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: KML/KMZ Map Viewer files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A professional geospatial web application for interactive visualization of KML and KMZ files directly in the browser. Built with Leaflet, Bootstrap 5, and OpenStreetMap, enabling seamless upload and rendering of geospatial data layers with no server-side processing required.
+  tagline:
+    en_us: Interactive KML/KMZ geospatial viewer - client-side map rendering
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/854/854929.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/854/854929.png
+  title:
+    en_us: KML/KMZ Map Viewer
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-KML-KMZ-Map-Viewer
+  port_map: "8915"
