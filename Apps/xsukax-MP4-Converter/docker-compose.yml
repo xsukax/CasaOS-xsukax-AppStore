@@ -1,0 +1,56 @@
+name: xsukax-mp4-converter
+services:
+  app:
+    image: nginx:alpine
+    container_name: mp4-converter
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8919
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/mp4-converter
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-MP4-Converter.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: MP4 Converter files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A powerful, privacy-focused web application for converting video files to MP4 format entirely in your browser. Client-side processing with no uploads, no server-side conversion, and complete control over your media files.
+  tagline:
+    en_us: Privacy-focused MP4 video converter - runs entirely in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/6785/6785621.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/6785/6785621.png
+  title:
+    en_us: MP4 Converter
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-MP4-Converter
+  port_map: "8919"
