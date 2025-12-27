@@ -1,0 +1,56 @@
+name: xsukax-global-time-manager
+services:
+  app:
+    image: nginx:alpine
+    container_name: global-time-manager
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - target: 80
+        published: 8918
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/global-time-manager
+        target: /usr/share/nginx/html
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -f /usr/share/nginx/html/index.html ]; then
+          echo 'Installing git and cloning repository...';
+          apk add --no-cache git;
+          git clone https://github.com/xsukax/xsukax-Global-Time-Manager.git /tmp/clone;
+          cp -r /tmp/clone/* /usr/share/nginx/html/;
+          chmod -R 755 /usr/share/nginx/html;
+          echo 'Repository cloned successfully!';
+        fi
+        echo 'Starting nginx...';
+        exec nginx -g 'daemon off;'
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Specify a timezone (e.g., America/New_York, Europe/London)
+      volumes:
+        - container: /usr/share/nginx/html
+          description:
+            en_us: Global Time Manager files location on host
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: app
+  description:
+    en_us: A lightweight, privacy-focused single-page application for tracking time across multiple cities worldwide. Built with vanilla JavaScript and designed with a modern GitHub-inspired aesthetic, this tool runs entirely in your browser with zero server dependencies.
+  tagline:
+    en_us: Track global time zones - privacy-first world clock in your browser
+  developer: xsukax
+  author: xsukax
+  icon: https://cdn-icons-png.flaticon.com/256/4144/4144391.png
+  thumbnail: https://cdn-icons-png.flaticon.com/256/4144/4144391.png
+  title:
+    en_us: Global Time Manager
+  category: Utilities
+  project_url: https://github.com/xsukax/xsukax-Global-Time-Manager
+  port_map: "8918"
